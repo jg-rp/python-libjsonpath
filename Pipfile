@@ -5,12 +5,14 @@ name = "pypi"
 
 [packages]
 python-libjsonpath = {editable = true, path = "."}
+libjsonpath = {editable = true, path = "."}
 
 [dev-packages]
 pytest = "*"
 pybind11 = "*"
 black = "*"
 build = "*"
+ruff = "*"
 
 [requires]
 python_version = "3.9"

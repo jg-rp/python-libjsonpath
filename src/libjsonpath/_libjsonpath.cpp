@@ -10,7 +10,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(libjsonpath, m)
+PYBIND11_MODULE(_libjsonpath, m)
 {
     m.doc() = "JSONPath parser";
 
@@ -55,8 +55,6 @@ PYBIND11_MODULE(libjsonpath, m)
         .def_readonly("value", &libjsonpath::Token::value)
         .def_readonly("index", &libjsonpath::Token::index)
         .def_readonly("query", &libjsonpath::Token::query)
-        .def("__eq__", [](const libjsonpath::Token &t, const libjsonpath::Token &other)
-             { return libjsonpath::operator==(t, other); })
         .def("__str__", [](const libjsonpath::Token &t)
              { return libjsonpath::token_to_string(t); });
 

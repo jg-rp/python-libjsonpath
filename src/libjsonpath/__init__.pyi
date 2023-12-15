@@ -1,7 +1,5 @@
 from enum import Enum
-from typing import Optionl
-from typing import Sequence
-from typing import Union
+from typing import Optional, Sequence, Union
 
 class TokenType(Enum):
     eof_ = ...
@@ -47,6 +45,11 @@ class Token:
     @property
     def query(self) -> str: ...
 
+class Lexer:
+    def __init__(self, query: str) -> None: ...
+    def run(self) -> None: ...
+    def tokens(self) -> Sequence[Token]: ...
+
 class BinaryOperator(Enum):
     none = ...
     logical_and = ...
@@ -76,7 +79,7 @@ Expression = Union[
     "StringLiteral",
     "LogicalNotExpression",
     "InfixExpression",
-    "ReltaiveQuery",
+    "RelativeQuery",
     "RootQuery",
     "FunctionCall",
 ]
@@ -190,3 +193,6 @@ class RecursiveSegment:
     def token(self) -> Token: ...
     @property
     def selectors(self) -> Sequence[Selector]: ...
+
+def parse(query: str) -> Segments: ...
+def to_string(segments: Segments) -> str: ...
