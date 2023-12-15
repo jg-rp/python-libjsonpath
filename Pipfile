@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+python-libjsonpath = {editable = true, path = "."}
+
+[dev-packages]
+pytest = "*"
+pybind11 = "*"
+black = "*"
+
+[requires]
+python_version = "3.9"
+python_full_version = "3.9.2"
