@@ -3,7 +3,7 @@ from glob import glob
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 ext_modules = [
     Pybind11Extension(
@@ -22,7 +22,7 @@ ext_modules = [
 ]
 
 setup(
-    name="python_libjsonpath",
+    name="libjsonpath",
     version=__version__,
     url="https://github.com/jg-rp/python_libjsonpath",
     description="Python bindings for libjsonpath.",
@@ -35,5 +35,5 @@ setup(
     zip_safe=False,
     python_requires=">=3.7",
     include_package_data=True,
-    package_data={"libjsonpath": ["src/py.typed", "src/libjsonpapth.pyi"]},
+    package_data={"": ["py.typed", "libjsonpath.pyi"]}
 )

@@ -10,6 +10,7 @@ python-libjsonpath = {editable = true, path = "."}
 pytest = "*"
 pybind11 = "*"
 black = "*"
+build = "*"
 
 [requires]
 python_version = "3.9"
