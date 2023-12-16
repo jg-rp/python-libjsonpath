@@ -5,6 +5,9 @@ from setuptools import setup
 
 __version__ = "0.1.0"
 
+# XXX: Make sure to run `cmake ..` from within `extern/libjsonpath/build`
+# before building this package.
+
 ext_modules = [
     Pybind11Extension(
         name="_libjsonpath",
