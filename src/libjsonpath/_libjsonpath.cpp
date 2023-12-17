@@ -4,6 +4,7 @@
 #include <libjsonpath/lex.hpp>
 #include <libjsonpath/selectors.hpp>
 #include <libjsonpath/jsonpath.hpp>
+#include <libjsonpath/utils.hpp>
 #include <variant>
 #include <vector>
 #include <string_view>
@@ -152,4 +153,5 @@ PYBIND11_MODULE(_libjsonpath, m)
 
     m.def("parse", &libjsonpath::parse, "Parse a JSONPath query string", py::return_value_policy::move);
     m.def("to_string", &libjsonpath::to_string, "JSONPath segments as a string");
+    m.def("singular_query", &libjsonpath::singular_query, "Return True if a JSONPath is a singular query");
 }
