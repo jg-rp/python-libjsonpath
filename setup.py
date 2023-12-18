@@ -3,7 +3,7 @@ from glob import glob
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
 
-__version__ = "0.1.0"
+__version__ = "0.1.5"
 
 # XXX: Make sure to run `cmake ..` from within `extern/libjsonpath/build`
 # before building this package.
