@@ -10,7 +10,6 @@
 #include <string_view>
 
 namespace py = pybind11;
-namespace jp = libjsonpath;
 
 PYBIND11_MODULE(_libjsonpath, m)
 {
@@ -97,40 +96,40 @@ PYBIND11_MODULE(_libjsonpath, m)
         .def_readonly("token", &libjsonpath::StringLiteral::token)
         .def_readonly("value", &libjsonpath::StringLiteral::value);
 
-    py::class_<jp::CompoundExpression<jp::LogicalNotExpression>>(m, "LogicalNotExpression")
-        .def_property_readonly("token", [](const jp::CompoundExpression<jp::LogicalNotExpression> &e)
+    py::class_<libjsonpath::Box<libjsonpath::LogicalNotExpression>>(m, "LogicalNotExpression")
+        .def_property_readonly("token", [](const libjsonpath::Box<libjsonpath::LogicalNotExpression> &e)
                                { return e->token; })
-        .def_property_readonly("right", [](const jp::CompoundExpression<jp::LogicalNotExpression> &e)
+        .def_property_readonly("right", [](const libjsonpath::Box<libjsonpath::LogicalNotExpression> &e)
                                { return e->right; });
 
-    py::class_<jp::CompoundExpression<jp::InfixExpression>>(m, "InfixExpression")
-        .def_property_readonly("token", [](const jp::CompoundExpression<jp::InfixExpression> &e)
+    py::class_<libjsonpath::Box<libjsonpath::InfixExpression>>(m, "InfixExpression")
+        .def_property_readonly("token", [](const libjsonpath::Box<libjsonpath::InfixExpression> &e)
                                { return e->token; })
-        .def_property_readonly("left", [](const jp::CompoundExpression<jp::InfixExpression> &e)
+        .def_property_readonly("left", [](const libjsonpath::Box<libjsonpath::InfixExpression> &e)
                                { return e->left; })
-        .def_property_readonly("op", [](const jp::CompoundExpression<jp::InfixExpression> &e)
+        .def_property_readonly("op", [](const libjsonpath::Box<libjsonpath::InfixExpression> &e)
                                { return e->op; })
-        .def_property_readonly("right", [](const jp::CompoundExpression<jp::InfixExpression> &e)
+        .def_property_readonly("right", [](const libjsonpath::Box<libjsonpath::InfixExpression> &e)
                                { return e->right; });
 
-    py::class_<jp::CompoundExpression<jp::RelativeQuery>>(m, "RelativeQuery")
-        .def_property_readonly("token", [](const jp::CompoundExpression<jp::RelativeQuery> &e)
+    py::class_<libjsonpath::Box<libjsonpath::RelativeQuery>>(m, "RelativeQuery")
+        .def_property_readonly("token", [](const libjsonpath::Box<libjsonpath::RelativeQuery> &e)
                                { return e->token; })
-        .def_property_readonly("query", [](const jp::CompoundExpression<jp::RelativeQuery> &e)
+        .def_property_readonly("query", [](const libjsonpath::Box<libjsonpath::RelativeQuery> &e)
                                { return e->query; });
 
-    py::class_<jp::CompoundExpression<jp::RootQuery>>(m, "RootQuery")
-        .def_property_readonly("token", [](const jp::CompoundExpression<jp::RootQuery> &e)
+    py::class_<libjsonpath::Box<libjsonpath::RootQuery>>(m, "RootQuery")
+        .def_property_readonly("token", [](const libjsonpath::Box<libjsonpath::RootQuery> &e)
                                { return e->token; })
-        .def_property_readonly("query", [](const jp::CompoundExpression<jp::RootQuery> &e)
+        .def_property_readonly("query", [](const libjsonpath::Box<libjsonpath::RootQuery> &e)
                                { return e->query; });
 
-    py::class_<jp::CompoundExpression<jp::FunctionCall>>(m, "FunctionCall")
-        .def_property_readonly("token", [](const jp::CompoundExpression<jp::FunctionCall> &e)
+    py::class_<libjsonpath::Box<libjsonpath::FunctionCall>>(m, "FunctionCall")
+        .def_property_readonly("token", [](const libjsonpath::Box<libjsonpath::FunctionCall> &e)
                                { return e->token; })
-        .def_property_readonly("name", [](const jp::CompoundExpression<jp::FunctionCall> &e)
+        .def_property_readonly("name", [](const libjsonpath::Box<libjsonpath::FunctionCall> &e)
                                { return e->name; })
-        .def_property_readonly("args", [](const jp::CompoundExpression<jp::FunctionCall> &e)
+        .def_property_readonly("args", [](const libjsonpath::Box<libjsonpath::FunctionCall> &e)
                                { return e->args; });
 
     py::class_<libjsonpath::NameSelector>(m, "NameSelector")
@@ -152,10 +151,10 @@ PYBIND11_MODULE(_libjsonpath, m)
         .def_readonly("stop", &libjsonpath::SliceSelector::stop)
         .def_readonly("step", &libjsonpath::SliceSelector::step);
 
-    py::class_<jp::CompoundExpression<jp::FilterSelector>>(m, "FilterSelector")
-        .def_property_readonly("token", [](const jp::CompoundExpression<jp::FilterSelector> &selector)
+    py::class_<libjsonpath::Box<libjsonpath::FilterSelector>>(m, "FilterSelector")
+        .def_property_readonly("token", [](const libjsonpath::Box<libjsonpath::FilterSelector> &selector)
                                { return selector->token; })
-        .def_property_readonly("expression", [](const jp::CompoundExpression<jp::FilterSelector> &selector)
+        .def_property_readonly("expression", [](const libjsonpath::Box<libjsonpath::FilterSelector> &selector)
                                { return selector->expression; });
 
     py::class_<libjsonpath::Segment>(m, "Segment")

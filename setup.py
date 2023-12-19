@@ -1,12 +1,13 @@
 from glob import glob
+import re
 
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
 
-__version__ = "0.1.5"
-
-# XXX: Make sure to run `cmake ..` from within `extern/libjsonpath/build`
-# before building this package.
+with open("src/libjsonpath/__about__.py", encoding="utf-8") as fd:
+    match = re.search(r'__version__ = "([0-9\.]+)"', fd.read())
+    assert match
+    __version__ = match.group(1)
 
 ext_modules = [
     Pybind11Extension(
