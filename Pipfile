@@ -12,6 +12,7 @@ pybind11 = "*"
 black = "*"
 build = "*"
 ruff = "*"
+ipython = "*"
 
 [requires]
 python_version = "3.9"

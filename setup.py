@@ -1,5 +1,5 @@
-from glob import glob
 import re
+from glob import glob
 
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
@@ -14,9 +14,12 @@ ext_modules = [
         name="_libjsonpath",
         sources=[
             "src/libjsonpath/_libjsonpath.cpp",
+            "src/libjsonpath/_node.cpp",
+            "src/libjsonpath/_path.cpp",
             *sorted(glob("extern/libjsonpath/src/libjsonpath/*.cpp")),
         ],
         include_dirs=[
+            "include",
             "extern/libjsonpath/include",
         ],
         # XXX: Example: passing in the version to the compiled code
