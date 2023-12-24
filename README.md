@@ -12,6 +12,8 @@ Repeating 364 queries from the [compliance test suite](https://github.com/jsonpa
 | Python on libjsonpath <sup>[2]</sup>   | 1.81 sec         | 0.09 sec     | 1.61 sec  |
 | pybind11 on libjsonpath <sup>[3]</sup> | 0.61 sec         | 0.08 sec     | 0.47 sec  |
 
-1. [jg-rp/python-jsonpath](https://github.com/jg-rp/python-jsonpath/graphs/traffic) - Works on any Mapping/Sequence types.
-2. [jg-rp/jsonpath11](https://github.com/jg-rp/jsonpath11) - Works on any Mapping/Sequence types.
-3. This project - Limited to dicts and lists. Still uses Python functions as the JSONPath function extension point.
+<sup>[1]</sup> [jg-rp/python-jsonpath](https://github.com/jg-rp/python-jsonpath/graphs/traffic) - Works on any Mapping/Sequence types.
+
+<sup>[2]</sup> [jg-rp/jsonpath11](https://github.com/jg-rp/jsonpath11) - Works on any Mapping/Sequence types.
+
+<sup>[3]</sup> This project - Limited to dicts and lists. Still uses Python functions as the JSONPath function extension point.
