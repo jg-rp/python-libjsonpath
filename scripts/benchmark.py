@@ -36,11 +36,11 @@ def valid_queries() -> Sequence[CTSCase]:
 
 QUERIES = valid_queries()
 
-COMPILE_AND_FIND_SETUP = "from libjsonpath import findall"
+COMPILE_AND_FIND_SETUP = "from libjsonpath import findall, xquery"
 
 COMPILE_AND_FIND_STMT = """\
 for path, data in QUERIES:
-    findall(path, data)"""
+    xquery(path, data)"""
 
 JUST_COMPILE_SETUP = "from libjsonpath import compile"
 
@@ -55,7 +55,7 @@ compiled_queries = [(compile(q), d) for q, d in QUERIES]
 
 JUST_FIND_STMT = """\
 for path, data in compiled_queries:
-    path.findall(data)"""
+    path.query(data)"""
 
 
 def benchmark(number: int = 100, best_of: int = 3) -> None:

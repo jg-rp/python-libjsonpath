@@ -226,8 +226,15 @@ PYBIND11_MODULE(_libjsonpath, m) {
       .def_readonly("location", &libjsonpath::JSONPathNode::location)
       .def("path", &libjsonpath::JSONPathNode::path);
 
-  m.def("query", &libjsonpath::query, "Query JSON-like data",
-        py::return_value_policy::move);
+  m.def("query",
+        py::overload_cast<const libjsonpath::segments_t&, py::object, py::dict,
+                          py::object>(&libjsonpath::query),
+        "Query JSON-like data", py::return_value_policy::move);
+
+  m.def("query",
+        py::overload_cast<std::string_view, py::object, py::dict, py::object>(
+            &libjsonpath::query),
+        "Query JSON-like data", py::return_value_policy::move);
 
   py::enum_<libjsonpath::ExpressionType>(m, "ExpressionType")
       .value("value", libjsonpath::ExpressionType::value)

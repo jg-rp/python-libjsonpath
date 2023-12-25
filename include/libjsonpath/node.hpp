@@ -13,6 +13,7 @@ namespace libjsonpath {
 
 using location_t = std::vector<std::variant<size_t, std::string>>;
 
+// A JSON-like object and its location within a JSON document.
 class JSONPathNode {
 public:
   py::object value;

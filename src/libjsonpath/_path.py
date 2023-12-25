@@ -1,9 +1,19 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+from typing import List
+
 from libjsonpath import NOTHING
 from libjsonpath import FunctionExtension
 from libjsonpath import functions
 from libjsonpath import parse
 from libjsonpath import query
 from libjsonpath import to_string
+
+if TYPE_CHECKING:
+    from libjsonpath import JSONPathNode
+
+# TODO: add type hints here, remove _path.pyi
 
 
 class JSONPath:
@@ -51,14 +61,14 @@ class JSONPathEnvironment:
         self.register_function("search", functions.Search())
         self.register_function("value", functions.Value())
 
-    def compile(self, path):  # noqa: A003
+    def compile(self, path: str) -> JSONPath:  # noqa: A003
         return JSONPath(self, parse(path))
 
-    def findall(self, path, data):
-        return self.compile(path).findall(data)
+    def findall(self, path: str, data: object) -> List[object]:
+        return [node.value for node in self.query(path, data)]
 
-    def query(self, path, data):
-        return self.compile(path).query(data)
+    def query(self, path: str, data: object) -> List[JSONPathNode]:
+        return query(path, data, self.function_register, NOTHING)
 
 
 __all__ = ("NOTHING", "JSONPath", "JSONPathEnvironment")

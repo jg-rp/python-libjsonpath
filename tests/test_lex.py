@@ -7,10 +7,11 @@ def assert_token_eq(
     index: int,
     value: str,
     query: str,
-) -> bool:
-    assert (
-        t.type == type_ and t.index == index and t.value == value and t.query == query
-    )
+) -> None:
+    assert t.type == type_
+    assert t.index == index
+    assert t.value == value
+    assert t.query == query
 
 
 def test_tokenize() -> None:
@@ -19,7 +20,7 @@ def test_tokenize() -> None:
     lexer = libjsonpath.Lexer(query)
     lexer.run()
     tokens = lexer.tokens()
-    assert len(tokens) == 4  # + EOF
+    assert len(tokens) == 4  # + EOF  # noqa: PLR2004
     assert_token_eq(tokens[0], libjsonpath.TokenType.root, 0, "$", query)
     assert_token_eq(tokens[1], libjsonpath.TokenType.name, 2, "foo", query)
     assert_token_eq(tokens[2], libjsonpath.TokenType.name, 6, "bar", query)

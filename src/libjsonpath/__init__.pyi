@@ -7,6 +7,7 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Union
+from typing import overload
 
 from ._path import JSONPath
 
@@ -236,8 +237,16 @@ class FunctionExtension:
     @property
     def res(self) -> ExpressionType: ...
 
+@overload
 def query(
     segments: Segments,
+    data: object,
+    functions: Dict[str, FunctionExtension],
+    nothing: object,
+): ...
+@overload
+def query(
+    path: str,
     data: object,
     functions: Dict[str, FunctionExtension],
     nothing: object,

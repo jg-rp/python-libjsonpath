@@ -11,3 +11,4 @@ from ._path import NOTHING, JSONPath, JSONPathEnvironment
 DEFAULT_ENV = JSONPathEnvironment()
 compile = DEFAULT_ENV.compile  # noqa: A001
 findall = DEFAULT_ENV.findall
+xquery = DEFAULT_ENV.query  # XXX:

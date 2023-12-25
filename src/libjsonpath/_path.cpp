@@ -5,8 +5,10 @@
 #include <variant>  // std::variant std::visit
 
 #include "libjsonpath/exceptions.hpp"
+#include "libjsonpath/jsonpath.hpp"
 #include "libjsonpath/node.hpp"
 #include "libjsonpath/path.hpp"
+#include "libjsonpath/selectors.hpp"
 
 namespace py = pybind11;
 
@@ -66,6 +68,36 @@ void descend(const JSONPathNode& node, std::vector<JSONPathNode>& out_nodes) {
     }
   }
 }
+
+// Return a list of values from a node list, or a single value if
+// the node list only has one item.
+py::object values_or_singular(const JSONPathNodeList& nodes) {
+  if (nodes.size() == 1) {
+    return nodes[0].value;
+  }
+
+  py::list values{};
+  for (auto node : nodes) {
+    values.append(node.value);
+  }
+
+  return values;
+}
+
+class QueryContext {
+public:
+  QueryContext(py::object root_, py::dict functions_, py::object nothing_);
+
+  const py::object root;
+  const py::dict functions;
+  const py::object nothing;
+};
+
+// Contextual objects a JSONPath filter will operate on.
+struct FilterContext {
+  const QueryContext& query;
+  py::object current;
+};
 
 QueryContext::QueryContext(py::object root_, py::dict functions_,
                            py::object nothing_)
@@ -474,17 +506,17 @@ JSONPathNodeList query(const segments_t& segments, py::object obj,
   return nodes;
 }
 
-py::object values_or_singular(const JSONPathNodeList& nodes) {
-  if (nodes.size() == 1) {
-    return nodes[0].value;
+JSONPathNodeList query(std::string_view path, py::object obj,
+                       py::dict functions, py::object nothing) {
+  segments_t segments{parse(path)};
+  QueryContext q_ctx{obj, functions, nothing};
+  // Bootstrap the node list with root object and an empty location.
+  JSONPathNodeList nodes{{obj, {}}};
+  for (auto segment : segments) {
+    nodes = resolve_segment(q_ctx, nodes, segment);
   }
-
-  py::list values{};
-  for (auto node : nodes) {
-    values.append(node.value);
-  }
-
-  return values;
+  // TODO: check for well-typed function extensions
+  return nodes;
 }
 
 }  // namespace libjsonpath
