@@ -1,10 +1,14 @@
-"""Classes modeling the JSONPath spec type system for function extensions."""
+"""Class modeling the JSONPath spec type system for function extensions."""
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Tuple
+from abc import ABC
+from abc import abstractmethod
+from typing import TYPE_CHECKING
+from typing import Any
+from typing import Tuple
 
-from libjsonpath import ExpressionType
+if TYPE_CHECKING:
+    from libjsonpath import ExpressionType
 
 
 class FilterFunction(ABC):
@@ -12,7 +16,7 @@ class FilterFunction(ABC):
 
     @property
     @abstractmethod
-    def arg_types(self) -> Tuple[ExpressionType]:
+    def arg_types(self) -> Tuple[ExpressionType, ...]:
         """Argument types expected by the filter function."""
 
     @property

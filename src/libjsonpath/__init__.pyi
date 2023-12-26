@@ -2,7 +2,6 @@ from enum import Enum
 from typing import Any
 from typing import Callable
 from typing import Dict
-from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -10,6 +9,7 @@ from typing import Union
 from typing import overload
 
 from ._path import JSONPath
+from .filter_function import FilterFunction as FilterFunction
 
 class TokenType(Enum):
     eof_ = ...
@@ -222,7 +222,7 @@ class JSONPathNode:
     def location(self) -> List[Union[int, str]]: ...
     def path(self) -> str: ...
 
-JSONPathNodeList = Iterable[JSONPathNode]
+JSONPathNodeList = Sequence[JSONPathNode]
 
 FilterFunctionT = Callable[..., Any]
 

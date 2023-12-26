@@ -3,8 +3,7 @@
 import re
 
 from libjsonpath import ExpressionType
-
-from .filter_function import FilterFunction
+from libjsonpath import FilterFunction
 
 
 class Match(FilterFunction):

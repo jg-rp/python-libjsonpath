@@ -3,7 +3,7 @@ from _libjsonpath import *  # TODO: don't import all of _libjsonpath into namesp
 NOTHING = object()
 
 from .__about__ import __version__
-from .functions import FilterFunction
+from .filter_function import FilterFunction
 from ._path import NOTHING, JSONPath, JSONPathEnvironment
 
 # TODO: __all__

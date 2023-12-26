@@ -6,6 +6,8 @@ Python bindings for [libjsonpath](https://github.com/jg-rp/libjsonpath).
 
 Repeating 364 queries from the [compliance test suite](https://github.com/jsonpath-standard/jsonpath-compliance-test-suite) 100 times. These are very small queries on very small data.
 
+All times are taken from a best of three run using Python 3.9 on the same machine.
+
 | Impl                                   | Compile and find (values) | Compile and find (nodes) | Just compile | Just find (values) | Just find (nodes) |
 | -------------------------------------- | ------------------------- | ------------------------ | ------------ | ------------------ | ----------------- |
 | Pure Python <sup>[1]</sup>             | 3.45 s                    | 3.35 s                   | 2.3 s        | 0.87 s             | 0.86 s            |

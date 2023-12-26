@@ -3,8 +3,7 @@ from collections.abc import Sized
 from typing import Optional
 
 from libjsonpath import ExpressionType
-
-from .filter_function import FilterFunction
+from libjsonpath import FilterFunction
 
 
 class Length(FilterFunction):

@@ -4,8 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from libjsonpath import ExpressionType
-
-from .filter_function import FilterFunction
+from libjsonpath import FilterFunction
 
 if TYPE_CHECKING:
     from libjsonpath import JSONPathNodeList
