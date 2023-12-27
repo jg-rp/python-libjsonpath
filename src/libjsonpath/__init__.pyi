@@ -1,6 +1,4 @@
 from enum import Enum
-from typing import Any
-from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -8,8 +6,46 @@ from typing import Sequence
 from typing import Union
 from typing import overload
 
+from ._env import JSONPathEnvironment
 from ._path import JSONPath
-from .filter_function import FilterFunction as FilterFunction
+from .filter_function import FilterFunction
+
+__all__ = (
+    "JSONPathEnvironment",
+    "FilterFunction",
+    "JSONPath",
+    "NOTHING",
+    "TokenType",
+    "Token",
+    "Lexer",
+    "BinaryOperator",
+    "ExpressionType",
+    "NullLiteral",
+    "BooleanLiteral",
+    "IntegerLiteral",
+    "FloatLiteral",
+    "StringLiteral",
+    "LogicalNotExpression",
+    "InfixExpression",
+    "RelativeQuery",
+    "RootQuery",
+    "FunctionCall",
+    "NameSelector",
+    "IndexSelector",
+    "WildSelector",
+    "SliceSelector",
+    "FilterSelector",
+    "Segment",
+    "RecursiveSegment",
+    "parse",
+    "to_string",
+    "singular_query",
+    "JSONPathNode",
+    "FunctionExtension",
+    "query",
+    "compile",
+    "findall",
+)
 
 class TokenType(Enum):
     eof_ = ...
@@ -224,14 +260,12 @@ class JSONPathNode:
 
 JSONPathNodeList = Sequence[JSONPathNode]
 
-FilterFunctionT = Callable[..., Any]
-
 class FunctionExtension:
     def __init__(
-        self, func: Callable[..., Any], args: List[ExpressionType], res: ExpressionType
+        self, func: FilterFunction, args: List[ExpressionType], res: ExpressionType
     ): ...
     @property
-    def func(self) -> Callable[..., Any]: ...
+    def func(self) -> FilterFunction: ...
     @property
     def args(self) -> List[ExpressionType]: ...
     @property
@@ -251,5 +285,7 @@ def query(
     functions: Dict[str, FunctionExtension],
     nothing: object,
 ): ...
-def compile(path: str) -> JSONPath: ...  # noqa: A001
+def compile(path: str) -> JSONPath: ...
 def findall(path: str, data: object) -> List[object]: ...
+
+NOTHING = object()

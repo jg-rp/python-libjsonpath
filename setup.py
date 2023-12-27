@@ -1,13 +1,17 @@
 import re
 from glob import glob
 
-from pybind11.setup_helpers import Pybind11Extension, build_ext
+from pybind11.setup_helpers import Pybind11Extension
+from pybind11.setup_helpers import build_ext
 from setuptools import setup
 
 with open("src/libjsonpath/__about__.py", encoding="utf-8") as fd:
     match = re.search(r'__version__ = "([0-9\.]+)"', fd.read())
     assert match
     __version__ = match.group(1)
+
+with open("README.md", encoding="utf8") as fd:
+    long_description = fd.read()
 
 ext_modules = [
     Pybind11Extension(
@@ -30,11 +34,11 @@ ext_modules = [
 setup(
     name="libjsonpath",
     package_dir={"": "src"},
-    packages=["libjsonpath"],
+    packages=["libjsonpath", "libjsonpath.functions"],
     version=__version__,
     url="https://github.com/jg-rp/python_libjsonpath",
     description="Python bindings for libjsonpath.",
-    long_description=open("README.md", encoding="utf8").read(),
+    long_description=long_description,
     long_description_content_type="text/markdown",
     ext_modules=ext_modules,
     extras_require={"test": "pytest"},

@@ -1,4 +1,4 @@
-"""Class modeling the JSONPath spec type system for function extensions."""
+"""Base class for JSONPath function extensions."""
 from __future__ import annotations
 
 from abc import ABC
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class FilterFunction(ABC):
-    """Base class for typed function extensions."""
+    """Base class for JSONPath function extensions."""
 
     @property
     @abstractmethod
