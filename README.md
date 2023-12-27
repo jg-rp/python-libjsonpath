@@ -11,7 +11,7 @@ All times are taken from a best of three run using Python 3.9 on the same machin
 | Impl                                   | Compile and find (values) | Compile and find (nodes) | Just compile | Just find (values) | Just find (nodes) |
 | -------------------------------------- | ------------------------- | ------------------------ | ------------ | ------------------ | ----------------- |
 | Pure Python <sup>[1]</sup>             | 3.45 s                    | 3.35 s                   | 2.3 s        | 0.87 s             | 0.86 s            |
-| Python on libjsonpath <sup>[2]</sup>   | 1.81 s                    | 1.78 s                   | 0.09 s       | 1.62 s             | 1.63 s            |
+| Python on libjsonpath <sup>[2]</sup>   | 1.67 s                    | 1.65 s                   | 0.62 s       | 0.86 s             | 0.85 s            |
 | pybind11 on libjsonpath <sup>[3]</sup> | 0.55 s                    | 0.25 s                   | 0.08 s       | 0.47 s             | 0.17 s            |
 
 <sup>[1]</sup> [jg-rp/python-jsonpath](https://github.com/jg-rp/python-jsonpath/graphs/traffic) - Works on any Mapping/Sequence types.
