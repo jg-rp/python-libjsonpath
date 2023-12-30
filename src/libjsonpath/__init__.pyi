@@ -11,41 +11,55 @@ from ._path import JSONPath
 from .filter_function import FilterFunction
 
 __all__ = (
-    "JSONPathEnvironment",
-    "FilterFunction",
-    "JSONPath",
-    "NOTHING",
-    "TokenType",
-    "Token",
-    "Lexer",
     "BinaryOperator",
-    "ExpressionType",
-    "NullLiteral",
     "BooleanLiteral",
-    "IntegerLiteral",
+    "compile",
+    "ExpressionType",
+    "FilterFunction",
+    "FilterSelector",
+    "findall",
     "FloatLiteral",
-    "StringLiteral",
-    "LogicalNotExpression",
+    "FunctionCall",
+    "FunctionExtension",
+    "FunctionExtensionTypes",
+    "IndexSelector",
     "InfixExpression",
+    "IntegerLiteral",
+    "JSONPath",
+    "JSONPathEnvironment",
+    "JSONPathException",
+    "JSONPathLexerError",
+    "JSONPathNode",
+    "JSONPathSyntaxError",
+    "JSONPathTypeError",
+    "Lexer",
+    "LogicalNotExpression",
+    "NameSelector",
+    "NOTHING",
+    "NullLiteral",
+    "parse",
+    "Parser",
+    "query",
+    "RecursiveSegment",
     "RelativeQuery",
     "RootQuery",
-    "FunctionCall",
-    "NameSelector",
-    "IndexSelector",
-    "WildSelector",
-    "SliceSelector",
-    "FilterSelector",
     "Segment",
-    "RecursiveSegment",
-    "parse",
-    "to_string",
     "singular_query",
-    "JSONPathNode",
-    "FunctionExtension",
+    "SliceSelector",
+    "StringLiteral",
+    "to_string",
+    "Token",
+    "TokenType",
+    "WildSelector",
     "query",
     "compile",
     "findall",
 )
+
+class JSONPathException(Exception): ...  # noqa: N818
+class JSONPathLexerError(JSONPathException): ...
+class JSONPathSyntaxError(JSONPathException): ...
+class JSONPathTypeError(JSONPathException): ...
 
 class TokenType(Enum):
     eof_ = ...
@@ -95,6 +109,25 @@ class Lexer:
     def __init__(self, query: str) -> None: ...
     def run(self) -> None: ...
     def tokens(self) -> Sequence[Token]: ...
+
+class FunctionExtensionTypes:
+    def __init__(self, args: List[ExpressionType], res: ExpressionType) -> None: ...
+    @property
+    def args(self) -> List[ExpressionType]: ...
+    @property
+    def res(self) -> ExpressionType: ...
+
+class Parser:
+    @overload
+    def __init__(self) -> None: ...
+    @overload
+    def __init__(
+        self, function_extensions: Dict[str, FunctionExtensionTypes]
+    ) -> None: ...
+    @overload
+    def parse(self, tokens: List[Token]) -> Segments: ...
+    @overload
+    def parse(self, path: str) -> Segments: ...
 
 class BinaryOperator(Enum):
     none = ...
@@ -283,6 +316,7 @@ def query(
     path: str,
     data: object,
     functions: Dict[str, FunctionExtension],
+    function_types: Dict[str, FunctionExtensionTypes],
     nothing: object,
 ): ...
 def compile(path: str) -> JSONPath: ...

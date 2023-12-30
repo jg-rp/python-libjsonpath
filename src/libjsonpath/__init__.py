@@ -1,31 +1,37 @@
-from _libjsonpath import TokenType
-from _libjsonpath import Token
-from _libjsonpath import Lexer
 from _libjsonpath import BinaryOperator
-from _libjsonpath import ExpressionType
-from _libjsonpath import NullLiteral
 from _libjsonpath import BooleanLiteral
-from _libjsonpath import IntegerLiteral
+from _libjsonpath import ExpressionType
+from _libjsonpath import FilterSelector
 from _libjsonpath import FloatLiteral
-from _libjsonpath import StringLiteral
-from _libjsonpath import LogicalNotExpression
+from _libjsonpath import FunctionCall
+from _libjsonpath import FunctionExtension
+from _libjsonpath import FunctionExtensionTypes
+from _libjsonpath import IndexSelector
 from _libjsonpath import InfixExpression
+from _libjsonpath import IntegerLiteral
+from _libjsonpath import JSONPathException
+from _libjsonpath import JSONPathLexerError
+from _libjsonpath import JSONPathNode
+from _libjsonpath import JSONPathSyntaxError
+from _libjsonpath import JSONPathTypeError
+from _libjsonpath import Lexer
+from _libjsonpath import LogicalNotExpression
+from _libjsonpath import NameSelector
+from _libjsonpath import NullLiteral
+from _libjsonpath import parse
+from _libjsonpath import Parser
+from _libjsonpath import query
+from _libjsonpath import RecursiveSegment
 from _libjsonpath import RelativeQuery
 from _libjsonpath import RootQuery
-from _libjsonpath import FunctionCall
-from _libjsonpath import NameSelector
-from _libjsonpath import IndexSelector
-from _libjsonpath import WildSelector
-from _libjsonpath import SliceSelector
-from _libjsonpath import FilterSelector
 from _libjsonpath import Segment
-from _libjsonpath import RecursiveSegment
-from _libjsonpath import parse
-from _libjsonpath import to_string
 from _libjsonpath import singular_query
-from _libjsonpath import JSONPathNode
-from _libjsonpath import FunctionExtension
-from _libjsonpath import query
+from _libjsonpath import SliceSelector
+from _libjsonpath import StringLiteral
+from _libjsonpath import to_string
+from _libjsonpath import Token
+from _libjsonpath import TokenType
+from _libjsonpath import WildSelector
 
 from .__about__ import __version__
 
@@ -36,40 +42,46 @@ from ._env import JSONPathEnvironment
 
 
 __all__ = (
-    "JSONPathEnvironment",
-    "FilterFunction",
-    "JSONPath",
-    "NOTHING",
-    "TokenType",
-    "Token",
-    "Lexer",
     "BinaryOperator",
-    "ExpressionType",
-    "NullLiteral",
     "BooleanLiteral",
-    "IntegerLiteral",
+    "compile",
+    "ExpressionType",
+    "FilterFunction",
+    "FilterSelector",
+    "findall",
     "FloatLiteral",
-    "StringLiteral",
-    "LogicalNotExpression",
+    "FunctionCall",
+    "FunctionExtension",
+    "FunctionExtensionTypes",
+    "IndexSelector",
     "InfixExpression",
+    "IntegerLiteral",
+    "JSONPath",
+    "JSONPathEnvironment",
+    "JSONPathException",
+    "JSONPathLexerError",
+    "JSONPathNode",
+    "JSONPathSyntaxError",
+    "JSONPathTypeError",
+    "Lexer",
+    "LogicalNotExpression",
+    "NameSelector",
+    "NOTHING",
+    "NullLiteral",
+    "parse",
+    "Parser",
+    "query",
+    "RecursiveSegment",
     "RelativeQuery",
     "RootQuery",
-    "FunctionCall",
-    "NameSelector",
-    "IndexSelector",
-    "WildSelector",
-    "SliceSelector",
-    "FilterSelector",
     "Segment",
-    "RecursiveSegment",
-    "parse",
-    "to_string",
     "singular_query",
-    "JSONPathNode",
-    "FunctionExtension",
-    "query",
-    "compile",
-    "findall",
+    "SliceSelector",
+    "StringLiteral",
+    "to_string",
+    "Token",
+    "TokenType",
+    "WildSelector",
 )
 
 DEFAULT_ENV = JSONPathEnvironment()

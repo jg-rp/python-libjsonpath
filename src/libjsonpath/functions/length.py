@@ -2,6 +2,7 @@
 from collections.abc import Sized
 from typing import Optional
 
+from libjsonpath import NOTHING
 from libjsonpath import ExpressionType
 from libjsonpath import FilterFunction
 
@@ -17,4 +18,4 @@ class Length(FilterFunction):
         try:
             return len(obj)
         except TypeError:
-            return None
+            return NOTHING

@@ -3,12 +3,15 @@
 #include <pybind11/stl_bind.h>
 
 #include <string_view>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
+#include "libjsonpath/exceptions.hpp"
 #include "libjsonpath/jsonpath.hpp"
 #include "libjsonpath/lex.hpp"
 #include "libjsonpath/node.hpp"
+#include "libjsonpath/parse.hpp"
 #include "libjsonpath/path.hpp"
 #include "libjsonpath/selectors.hpp"
 #include "libjsonpath/tokens.hpp"
@@ -21,6 +24,18 @@ PYBIND11_MAKE_OPAQUE(std::vector<libjsonpath::JSONPathNode>);
 PYBIND11_MODULE(_libjsonpath, m) {
   m.doc() = "JSONPath parser";
 
+  auto base_exception =
+      py::register_exception<libjsonpath::Exception>(m, "JSONPathException");
+
+  py::register_exception<libjsonpath::LexerError>(m, "JSONPathLexerError",
+                                                  base_exception.ptr());
+
+  py::register_exception<libjsonpath::SyntaxError>(m, "JSONPathSyntaxError",
+                                                   base_exception.ptr());
+
+  py::register_exception<libjsonpath::TypeError>(m, "JSONPathTypeError",
+                                                 base_exception.ptr());
+
   py::enum_<libjsonpath::TokenType>(m, "TokenType")
       .value("eof_", libjsonpath::TokenType::eof_)
       .value("and_", libjsonpath::TokenType::and_)
@@ -32,7 +47,7 @@ PYBIND11_MODULE(_libjsonpath, m) {
       .value("eq", libjsonpath::TokenType::eq)
       .value("error", libjsonpath::TokenType::error)
       .value("false_", libjsonpath::TokenType::false_)
-      .value("filter", libjsonpath::TokenType::filter)
+      .value("filter", libjsonpath::TokenType::filter_)
       .value("float_", libjsonpath::TokenType::float_)
       .value("func_", libjsonpath::TokenType::func_)
       .value("ge", libjsonpath::TokenType::ge)
@@ -43,7 +58,7 @@ PYBIND11_MODULE(_libjsonpath, m) {
       .value("le", libjsonpath::TokenType::le)
       .value("lparen", libjsonpath::TokenType::lparen)
       .value("lt", libjsonpath::TokenType::lt)
-      .value("name", libjsonpath::TokenType::name)
+      .value("name", libjsonpath::TokenType::name_)
       .value("ne", libjsonpath::TokenType::ne)
       .value("not_", libjsonpath::TokenType::not_)
       .value("null_", libjsonpath::TokenType::null_)
@@ -70,6 +85,21 @@ PYBIND11_MODULE(_libjsonpath, m) {
       .def(py::init<std::string_view>())
       .def("run", &libjsonpath::Lexer::run)
       .def("tokens", &libjsonpath::Lexer::tokens);
+
+  py::class_<libjsonpath::Parser>(m, "Parser")
+      .def(py::init<>())
+      .def(py::init<std::unordered_map<std::string,
+                                       libjsonpath::FunctionExtensionTypes>>())
+      .def("parse",
+           py::overload_cast<const libjsonpath::Tokens&>(
+               &libjsonpath::Parser::parse, py::const_),
+           "Parse a JSONPath from a sequence of tokens",
+           py::return_value_policy::move)
+
+      .def("parse",
+           py::overload_cast<std::string_view>(&libjsonpath::Parser::parse,
+                                               py::const_),
+           "Parse a JSONPath query string", py::return_value_policy::move);
 
   // TODO: __str__ for all of these..
 
@@ -215,8 +245,29 @@ PYBIND11_MODULE(_libjsonpath, m) {
       .def_readonly("token", &libjsonpath::RecursiveSegment::token)
       .def_readonly("selectors", &libjsonpath::RecursiveSegment::selectors);
 
-  m.def("parse", &libjsonpath::parse, "Parse a JSONPath query string",
-        py::return_value_policy::move);
+  py::enum_<libjsonpath::ExpressionType>(m, "ExpressionType")
+      .value("value", libjsonpath::ExpressionType::value)
+      .value("logical", libjsonpath::ExpressionType::logical)
+      .value("nodes", libjsonpath::ExpressionType::nodes)
+      .export_values();
+
+  py::class_<libjsonpath::FunctionExtensionTypes>(m, "FunctionExtensionTypes")
+      .def(py::init<std::vector<libjsonpath::ExpressionType>,
+                    libjsonpath::ExpressionType>())
+      .def_readonly("args", &libjsonpath::FunctionExtensionTypes::args)
+      .def_readonly("res", &libjsonpath::FunctionExtensionTypes::res);
+
+  m.def("parse", py::overload_cast<std::string_view>(&libjsonpath::parse),
+        "Parse a JSONPath query string", py::return_value_policy::move);
+
+  m.def(
+      "parse",
+      py::overload_cast<
+          std::string_view,
+          std::unordered_map<std::string, libjsonpath::FunctionExtensionTypes>>(
+          &libjsonpath::parse),
+      "Parse a JSONPath query string", py::return_value_policy::move);
+
   m.def("to_string", &libjsonpath::to_string, "JSONPath segments as a string");
   m.def("singular_query", &libjsonpath::singular_query,
         "Return True if a JSONPath is a singular query");
@@ -231,16 +282,13 @@ PYBIND11_MODULE(_libjsonpath, m) {
                           py::object>(&libjsonpath::query),
         "Query JSON-like data", py::return_value_policy::move);
 
-  m.def("query",
-        py::overload_cast<std::string_view, py::object, py::dict, py::object>(
-            &libjsonpath::query),
-        "Query JSON-like data", py::return_value_policy::move);
-
-  py::enum_<libjsonpath::ExpressionType>(m, "ExpressionType")
-      .value("value", libjsonpath::ExpressionType::value)
-      .value("logical", libjsonpath::ExpressionType::logical)
-      .value("nodes", libjsonpath::ExpressionType::nodes)
-      .export_values();
+  m.def(
+      "query",
+      py::overload_cast<std::string_view, py::object, py::dict,
+                        const std::unordered_map<
+                            std::string, libjsonpath::FunctionExtensionTypes>&,
+                        py::object>(&libjsonpath::query),
+      "Query JSON-like data", py::return_value_policy::move);
 
   py::class_<libjsonpath::FunctionExtension>(m, "FunctionExtension")
       .def(py::init<py::function, std::vector<libjsonpath::ExpressionType>,

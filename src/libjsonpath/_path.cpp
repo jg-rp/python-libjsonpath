@@ -196,9 +196,16 @@ public:
       if (std::holds_alternative<JSONPathNodeList>(arg_rv)) {
         auto nodes{std::get<JSONPathNodeList>(arg_rv)};
         // Is the parameter expected a node list of values?
-        // XXX: assumes the function call has already been validated.
+        // Assumes the function call has already been validated and has
+        // the correct number of arguments.
         if (func_ext.args[index] != ExpressionType::nodes) {
-          args.append(values_or_singular(nodes));
+          if (nodes.empty()) {
+            args.append(m_context.query.nothing);
+          } else if (nodes.size() == 1) {
+            args.append(nodes[0].value);
+          } else {
+            args.append(py::cast(nodes));
+          }
         } else {
           py::list node_list = py::cast(nodes);
           args.append(node_list);
@@ -506,9 +513,12 @@ JSONPathNodeList query(const segments_t& segments, py::object obj,
   return nodes;
 }
 
-JSONPathNodeList query(std::string_view path, py::object obj,
-                       py::dict functions, py::object nothing) {
-  segments_t segments{parse(path)};
+JSONPathNodeList query(
+    std::string_view path, py::object obj, py::dict functions,
+    const std::unordered_map<std::string, FunctionExtensionTypes>&
+        function_types,
+    py::object nothing) {
+  segments_t segments{parse(path, function_types)};
   QueryContext q_ctx{obj, functions, nothing};
   // Bootstrap the node list with root object and an empty location.
   JSONPathNodeList nodes{{obj, {}}};

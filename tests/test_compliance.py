@@ -17,8 +17,6 @@ from typing import Union
 import libjsonpath
 import pytest
 
-# from jsonpath.exceptions import JSONPathError
-
 
 @dataclass
 class Case:
@@ -63,11 +61,10 @@ def test_compliance(case: Case) -> None:
     test_case.assertCountEqual(rv, case.result)  # noqa: PT009
 
 
-# TODO: wrap libjsonpath exceptions
-# @pytest.mark.parametrize("case", invalid_cases(), ids=operator.attrgetter("name"))
-# def test_invalid_selectors(case: Case) -> None:
-#     if case.name in SKIP:
-#         pytest.skip(reason=SKIP[case.name])
+@pytest.mark.parametrize("case", invalid_cases(), ids=operator.attrgetter("name"))
+def test_invalid_selectors(case: Case) -> None:
+    if case.name in SKIP:
+        pytest.skip(reason=SKIP[case.name])
 
-#     with pytest.raises(JSONPathError):
-#         jsonpath.compile(case.selector)
+    with pytest.raises(libjsonpath.JSONPathException):
+        libjsonpath.compile(case.selector)

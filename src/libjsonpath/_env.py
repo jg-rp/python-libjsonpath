@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 
 
 from libjsonpath import FunctionExtension
+from libjsonpath import FunctionExtensionTypes
+from libjsonpath import Parser
 from libjsonpath import parse
 from libjsonpath import query
 
@@ -23,16 +25,20 @@ from .functions import Value
 
 
 class JSONPathEnvironment:
-    __slots__ = ("function_register",)
+    __slots__ = ("function_register", "_parser", "_function_types")
 
     def __init__(self) -> None:
         self.function_register: Dict[str, FunctionExtension] = {}
         self.setup_function_register()
+        self._function_types = self._just_function_types()
+        self._parser = Parser(self._function_types)
 
     def register_function(self, name: str, func: FilterFunction) -> None:
         self.function_register[name] = FunctionExtension(
             func, list(func.arg_types), func.return_type
         )
+        self._function_types = self._just_function_types()
+        self._parser = Parser(self._function_types)
 
     def setup_function_register(self) -> None:
         """Initialize function extensions."""
@@ -49,4 +55,10 @@ class JSONPathEnvironment:
         return [node.value for node in self.query(path, data)]
 
     def query(self, path: str, data: object) -> List[JSONPathNode]:
-        return query(path, data, self.function_register, NOTHING)
+        return query(path, data, self.function_register, self._function_types, NOTHING)
+
+    def _just_function_types(self) -> Dict[str, FunctionExtensionTypes]:
+        return {
+            k: FunctionExtensionTypes(v.args, v.res)
+            for k, v in self.function_register.items()
+        }
