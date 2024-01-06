@@ -4,8 +4,9 @@ from _libjsonpath import ExpressionType
 from _libjsonpath import FilterSelector
 from _libjsonpath import FloatLiteral
 from _libjsonpath import FunctionCall
-from _libjsonpath import FunctionExtension
+from _libjsonpath import FunctionExtensionMap
 from _libjsonpath import FunctionExtensionTypes
+from _libjsonpath import FunctionSignatureMap
 from _libjsonpath import IndexSelector
 from _libjsonpath import InfixExpression
 from _libjsonpath import IntegerLiteral
@@ -20,7 +21,7 @@ from _libjsonpath import NameSelector
 from _libjsonpath import NullLiteral
 from _libjsonpath import parse
 from _libjsonpath import Parser
-from _libjsonpath import query
+from _libjsonpath import query_
 from _libjsonpath import RecursiveSegment
 from _libjsonpath import RelativeQuery
 from _libjsonpath import RootQuery
@@ -32,6 +33,7 @@ from _libjsonpath import to_string
 from _libjsonpath import Token
 from _libjsonpath import TokenType
 from _libjsonpath import WildSelector
+from _libjsonpath import Env_
 
 from .__about__ import __version__
 
@@ -45,14 +47,16 @@ __all__ = (
     "BinaryOperator",
     "BooleanLiteral",
     "compile",
+    "Env_",
     "ExpressionType",
     "FilterFunction",
     "FilterSelector",
     "findall",
     "FloatLiteral",
     "FunctionCall",
-    "FunctionExtension",
+    "FunctionExtensionMap",
     "FunctionExtensionTypes",
+    "FunctionSignatureMap",
     "IndexSelector",
     "InfixExpression",
     "IntegerLiteral",
@@ -70,7 +74,7 @@ __all__ = (
     "NullLiteral",
     "parse",
     "Parser",
-    "query",
+    "query_",
     "RecursiveSegment",
     "RelativeQuery",
     "RootQuery",
@@ -87,4 +91,4 @@ __all__ = (
 DEFAULT_ENV = JSONPathEnvironment()
 compile = DEFAULT_ENV.compile  # noqa: A001
 findall = DEFAULT_ENV.findall
-xquery = DEFAULT_ENV.query  # XXX:
+query = DEFAULT_ENV.query

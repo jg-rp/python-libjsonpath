@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Dict
 from typing import List
+from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import Union
@@ -20,8 +21,9 @@ __all__ = (
     "findall",
     "FloatLiteral",
     "FunctionCall",
-    "FunctionExtension",
+    "FunctionExtensionMap",
     "FunctionExtensionTypes",
+    "FunctionSignatureMap",
     "IndexSelector",
     "InfixExpression",
     "IntegerLiteral",
@@ -39,7 +41,7 @@ __all__ = (
     "NullLiteral",
     "parse",
     "Parser",
-    "query",
+    "query_",
     "RecursiveSegment",
     "RelativeQuery",
     "RootQuery",
@@ -293,33 +295,39 @@ class JSONPathNode:
 
 JSONPathNodeList = Sequence[JSONPathNode]
 
-class FunctionExtension:
-    def __init__(
-        self, func: FilterFunction, args: List[ExpressionType], res: ExpressionType
-    ): ...
-    @property
-    def func(self) -> FilterFunction: ...
-    @property
-    def args(self) -> List[ExpressionType]: ...
-    @property
-    def res(self) -> ExpressionType: ...
+class FunctionExtensionMap(Dict[str, FilterFunction]): ...
+class FunctionSignatureMap(Dict[str, FunctionExtensionTypes]): ...
 
 @overload
-def query(
+def query_(
     segments: Segments,
     data: object,
-    functions: Dict[str, FunctionExtension],
+    functions: FunctionExtensionMap,
+    signatures: FunctionSignatureMap,
     nothing: object,
-): ...
+) -> List[JSONPathNode]: ...
 @overload
-def query(
+def query_(
     path: str,
     data: object,
-    functions: Dict[str, FunctionExtension],
-    function_types: Dict[str, FunctionExtensionTypes],
+    functions: FunctionExtensionMap,
+    signatures: FunctionSignatureMap,
     nothing: object,
-): ...
+) -> List[JSONPathNode]: ...
+
+class Env_:  # noqa: N801
+    def __init__(
+        self,
+        functions: FunctionExtensionMap,
+        signatures: FunctionSignatureMap,
+        nothing: object,
+    ) -> None: ...
+    def query(self, path: str, data: object) -> List[JSONPathNode]: ...
+    def from_segments(self, segments: Segments, data: object) -> List[JSONPathNode]: ...
+    def parse(self, path: str) -> Segments: ...
+
 def compile(path: str) -> JSONPath: ...
 def findall(path: str, data: object) -> List[object]: ...
+def query(path: str, data: object) -> List[JSONPathNode]: ...
 
 NOTHING = object()

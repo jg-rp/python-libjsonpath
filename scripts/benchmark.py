@@ -36,11 +36,15 @@ def valid_queries() -> Sequence[CTSCase]:
 
 QUERIES = valid_queries()
 
-COMPILE_AND_FIND_SETUP = "from libjsonpath import findall, xquery"
+COMPILE_AND_FIND_SETUP = "from libjsonpath import findall, query"
 
 COMPILE_AND_FIND_STMT = """\
 for path, data in QUERIES:
-    xquery(path, data)"""
+    findall(path, data)"""
+
+COMPILE_AND_FIND_NODES_STMT = """\
+for path, data in QUERIES:
+    query(path, data)"""
 
 JUST_COMPILE_SETUP = "from libjsonpath import compile"
 
@@ -54,6 +58,10 @@ compiled_queries = [(compile(q), d) for q, d in QUERIES]
 """
 
 JUST_FIND_STMT = """\
+for path, data in compiled_queries:
+    path.findall(data)"""
+
+JUST_FIND_NODES_STMT = """\
 for path, data in compiled_queries:
     path.query(data)"""
 
@@ -69,7 +77,17 @@ def benchmark(number: int = 100, best_of: int = 3) -> None:
         repeat=best_of,
     )
 
-    print("compile and find", results)
+    print("compile and find".ljust(25), results)
+
+    results = timeit.repeat(
+        COMPILE_AND_FIND_NODES_STMT,
+        setup=COMPILE_AND_FIND_SETUP,
+        globals={"QUERIES": QUERIES},
+        number=number,
+        repeat=best_of,
+    )
+
+    print("compile and find (nodes)".ljust(25), results)
 
     results = timeit.repeat(
         JUST_COMPILE_STMT,
@@ -79,7 +97,7 @@ def benchmark(number: int = 100, best_of: int = 3) -> None:
         repeat=best_of,
     )
 
-    print("just compile", results)
+    print("just compile".ljust(25), results)
 
     results = timeit.repeat(
         JUST_FIND_STMT,
@@ -89,7 +107,17 @@ def benchmark(number: int = 100, best_of: int = 3) -> None:
         repeat=best_of,
     )
 
-    print("just find", results)
+    print("just find".ljust(25), results)
+
+    results = timeit.repeat(
+        JUST_FIND_NODES_STMT,
+        setup=JUST_FIND_SETUP,
+        globals={"QUERIES": QUERIES},
+        number=number,
+        repeat=best_of,
+    )
+
+    print("just find (nodes)".ljust(25), results)
 
 
 if __name__ == "__main__":

@@ -20,6 +20,9 @@
 namespace py = pybind11;
 
 PYBIND11_MAKE_OPAQUE(std::vector<libjsonpath::JSONPathNode>);
+PYBIND11_MAKE_OPAQUE(
+    std::unordered_map<std::string, libjsonpath::FunctionExtensionTypes>);
+PYBIND11_MAKE_OPAQUE(std::unordered_map<std::string, py::function>);
 
 PYBIND11_MODULE(_libjsonpath, m) {
   m.doc() = "JSONPath parser";
@@ -35,6 +38,15 @@ PYBIND11_MODULE(_libjsonpath, m) {
 
   py::register_exception<libjsonpath::TypeError>(m, "JSONPathTypeError",
                                                  base_exception.ptr());
+
+  py::register_exception<libjsonpath::IndexError>(m, "JSONPathIndexError",
+                                                  base_exception.ptr());
+
+  py::register_exception<libjsonpath::NameError>(m, "JSONPathNameError",
+                                                 base_exception.ptr());
+
+  py::register_exception<libjsonpath::EncodingError>(m, "JSONPathEncodingError",
+                                                     base_exception.ptr());
 
   py::enum_<libjsonpath::TokenType>(m, "TokenType")
       .value("eof_", libjsonpath::TokenType::eof_)
@@ -257,6 +269,12 @@ PYBIND11_MODULE(_libjsonpath, m) {
       .def_readonly("args", &libjsonpath::FunctionExtensionTypes::args)
       .def_readonly("res", &libjsonpath::FunctionExtensionTypes::res);
 
+  py::bind_vector<std::vector<libjsonpath::JSONPathNode>>(m,
+                                                          "JSONPathNodeList");
+
+  py::bind_map<libjsonpath::function_signature_map>(m, "FunctionSignatureMap");
+  py::bind_map<libjsonpath::function_extension_map>(m, "FunctionExtensionMap");
+
   m.def("parse", py::overload_cast<std::string_view>(&libjsonpath::parse),
         "Parse a JSONPath query string", py::return_value_policy::move);
 
@@ -277,26 +295,25 @@ PYBIND11_MODULE(_libjsonpath, m) {
       .def_readonly("location", &libjsonpath::JSONPathNode::location)
       .def("path", &libjsonpath::JSONPathNode::path);
 
-  m.def("query",
-        py::overload_cast<const libjsonpath::segments_t&, py::object, py::dict,
-                          py::object>(&libjsonpath::query),
+  m.def("query_",
+        py::overload_cast<const libjsonpath::segments_t&, py::object,
+                          libjsonpath::function_extension_map,
+                          libjsonpath::function_signature_map, py::object>(
+            &libjsonpath::query_),
         "Query JSON-like data", py::return_value_policy::move);
 
-  m.def(
-      "query",
-      py::overload_cast<std::string_view, py::object, py::dict,
-                        const std::unordered_map<
-                            std::string, libjsonpath::FunctionExtensionTypes>&,
-                        py::object>(&libjsonpath::query),
-      "Query JSON-like data", py::return_value_policy::move);
+  m.def("query_",
+        py::overload_cast<std::string_view, py::object,
+                          libjsonpath::function_extension_map,
+                          libjsonpath::function_signature_map, py::object>(
+            &libjsonpath::query_),
+        "Query JSON-like data", py::return_value_policy::move);
 
-  py::class_<libjsonpath::FunctionExtension>(m, "FunctionExtension")
-      .def(py::init<py::function, std::vector<libjsonpath::ExpressionType>,
-                    libjsonpath::ExpressionType>())
-      .def_readonly("func", &libjsonpath::FunctionExtension::func)
-      .def_readonly("args", &libjsonpath::FunctionExtension::args)
-      .def_readonly("res", &libjsonpath::FunctionExtension::res);
-
-  py::bind_vector<std::vector<libjsonpath::JSONPathNode>>(m,
-                                                          "JSONPathNodeList");
+  py::class_<libjsonpath::Env_>(m, "Env_")
+      .def(py::init<libjsonpath::function_extension_map,
+                    libjsonpath::function_signature_map, py::object>())
+      .def("query", &libjsonpath::Env_::query, py::return_value_policy::move)
+      .def("from_segments", &libjsonpath::Env_::from_segments,
+           py::return_value_policy::move)
+      .def("parse", &libjsonpath::Env_::parse, py::return_value_policy::move);
 }

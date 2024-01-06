@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import List
 
-from libjsonpath import query
+from libjsonpath import query_
 from libjsonpath import to_string
 
 from ._nothing import NOTHING
@@ -28,10 +28,11 @@ class JSONPath:
         return [node.value for node in self.query(data)]
 
     def query(self, data: object) -> List[JSONPathNode]:
-        return query(
+        return query_(
             self.segments,
             data,
-            self.environment.function_register,
+            self.environment._function_register,  # noqa: SLF001
+            self.environment._function_signatures,  # noqa: SLF001
             NOTHING,
         )
 

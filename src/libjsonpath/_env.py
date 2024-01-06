@@ -1,19 +1,18 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from typing import Dict
 from typing import List
 
 if TYPE_CHECKING:
     from libjsonpath import FilterFunction
     from libjsonpath import JSONPathNode
+    from libjsonpath import Segments
 
 
-from libjsonpath import FunctionExtension
+from libjsonpath import Env_
+from libjsonpath import FunctionExtensionMap
 from libjsonpath import FunctionExtensionTypes
-from libjsonpath import Parser
-from libjsonpath import parse
-from libjsonpath import query
+from libjsonpath import FunctionSignatureMap
 
 from ._nothing import NOTHING
 from ._path import JSONPath
@@ -25,20 +24,28 @@ from .functions import Value
 
 
 class JSONPathEnvironment:
-    __slots__ = ("function_register", "_parser", "_function_types")
+    __slots__ = ("_function_register", "_function_signatures", "_env")
 
     def __init__(self) -> None:
-        self.function_register: Dict[str, FunctionExtension] = {}
+        self._function_register = FunctionExtensionMap()
+        self._function_signatures = FunctionSignatureMap()
         self.setup_function_register()
-        self._function_types = self._just_function_types()
-        self._parser = Parser(self._function_types)
+        self._env = Env_(
+            self._function_register,
+            self._function_signatures,
+            NOTHING,
+        )
 
     def register_function(self, name: str, func: FilterFunction) -> None:
-        self.function_register[name] = FunctionExtension(
-            func, list(func.arg_types), func.return_type
+        self._function_register[name] = func
+        self._function_signatures[name] = FunctionExtensionTypes(
+            list(func.arg_types), func.return_type
         )
-        self._function_types = self._just_function_types()
-        self._parser = Parser(self._function_types)
+        self._env = Env_(
+            self._function_register,
+            self._function_signatures,
+            NOTHING,
+        )
 
     def setup_function_register(self) -> None:
         """Initialize function extensions."""
@@ -49,16 +56,13 @@ class JSONPathEnvironment:
         self.register_function("value", Value())
 
     def compile(self, path: str) -> JSONPath:  # noqa: A003
-        return JSONPath(self, parse(path))
+        return JSONPath(self, self._env.parse(path))
 
     def findall(self, path: str, data: object) -> List[object]:
         return [node.value for node in self.query(path, data)]
 
     def query(self, path: str, data: object) -> List[JSONPathNode]:
-        return query(path, data, self.function_register, self._function_types, NOTHING)
+        return self._env.query(path, data)
 
-    def _just_function_types(self) -> Dict[str, FunctionExtensionTypes]:
-        return {
-            k: FunctionExtensionTypes(v.args, v.res)
-            for k, v in self.function_register.items()
-        }
+    def from_segments(self, segments: Segments, data: object) -> List[JSONPathNode]:
+        return self._env.from_segments(segments, data)

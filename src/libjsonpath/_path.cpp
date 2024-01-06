@@ -1,8 +1,9 @@
-#include <cmath>    // std::abs
-#include <cstdint>  // std::int64_t
-#include <limits>   // std::numeric_limits
-#include <string>   // std::string
-#include <variant>  // std::variant std::visit
+#include <cmath>          // std::abs
+#include <cstdint>        // std::int64_t
+#include <limits>         // std::numeric_limits
+#include <string>         // std::string
+#include <unordered_map>  // std::unordered_map
+#include <variant>        // std::variant std::visit
 
 #include "libjsonpath/exceptions.hpp"
 #include "libjsonpath/jsonpath.hpp"
@@ -25,8 +26,7 @@ size_t normalized_index(size_t length, std::int64_t index, const Token& token) {
   }
 
   if (length > static_cast<size_t>(std::numeric_limits<std::int64_t>::max())) {
-    // TODO: better exception
-    throw Exception("array index out of range", token);
+    throw IndexError("array index out of range", token);
   }
 
   std::int64_t positive_index = length + index;
@@ -86,22 +86,29 @@ py::object values_or_singular(const JSONPathNodeList& nodes) {
 
 class QueryContext {
 public:
-  QueryContext(py::object root_, py::dict functions_, py::object nothing_);
+  QueryContext(py::object root_, const function_extension_map& functions_,
+               const function_signature_map& signatures_, py::object nothing_);
 
   const py::object root;
-  const py::dict functions;
+  const function_extension_map& functions;
+  const function_signature_map& signatures;
   const py::object nothing;
 };
+
+QueryContext::QueryContext(py::object root_,
+                           const function_extension_map& functions_,
+                           const function_signature_map& signatures_,
+                           py::object nothing_)
+    : root{root_},
+      functions{functions_},
+      signatures{signatures_},
+      nothing{nothing_} {}
 
 // Contextual objects a JSONPath filter will operate on.
 struct FilterContext {
   const QueryContext& query;
   py::object current;
 };
-
-QueryContext::QueryContext(py::object root_, py::dict functions_,
-                           py::object nothing_)
-    : root{root_}, functions{functions_}, nothing{nothing_} {}
 
 class ExpressionVisitor {
 private:
@@ -168,25 +175,35 @@ public:
   }
 
   expression_rv operator()(const Box<RelativeQuery>& expression) const {
-    return query(expression->query, m_context.current,
-                 m_context.query.functions, m_context.query.nothing);
+    return query_(expression->query, m_context.current,
+                  m_context.query.functions, m_context.query.signatures,
+                  m_context.query.nothing);
   }
 
   expression_rv operator()(const Box<RootQuery>& expression) const {
-    return query(expression->query, m_context.query.root,
-                 m_context.query.functions, m_context.query.nothing);
+    return query_(expression->query, m_context.query.root,
+                  m_context.query.functions, m_context.query.signatures,
+                  m_context.query.nothing);
   }
 
   expression_rv operator()(const Box<FunctionCall>& expression) const {
-    if (!m_context.query.functions.contains(py::str(expression->name))) {
-      throw Exception(  // TODO: better exception
+    auto name{std::string{expression->name}};
+    auto it{m_context.query.functions.find(name)};
+    if (it == m_context.query.functions.end()) {
+      throw NameError(
           "undefined filter function '"s + std::string(expression->name) + "'"s,
           expression->token);
     }
 
-    FunctionExtension func_ext{
-        m_context.query.functions[py::str(expression->name)]
-            .cast<FunctionExtension>()};
+    py::function func = it->second;
+
+    auto sig_it{m_context.query.signatures.find(name)};
+    if (sig_it == m_context.query.signatures.end()) {
+      throw NameError("missing types for filter function '"s +
+                          std::string(expression->name) + "'"s,
+                      expression->token);
+    }
+    FunctionExtensionTypes func_sig = sig_it->second;
 
     py::list args{};
     size_t index = 0;
@@ -198,7 +215,7 @@ public:
         // Is the parameter expected a node list of values?
         // Assumes the function call has already been validated and has
         // the correct number of arguments.
-        if (func_ext.args[index] != ExpressionType::nodes) {
+        if (func_sig.args[index] != ExpressionType::nodes) {
           if (nodes.empty()) {
             args.append(m_context.query.nothing);
           } else if (nodes.size() == 1) {
@@ -217,8 +234,8 @@ public:
       index++;
     }
 
-    auto rv{func_ext.func(*args)};
-    if (func_ext.res == ExpressionType::nodes) {
+    auto rv{func(*args)};
+    if (func_sig.res == ExpressionType::nodes) {
       // TODO: catch exception.
       return rv.cast<JSONPathNodeList>();
     }
@@ -258,13 +275,6 @@ private:
     // Both left and right are py objects.
     py::object left{std::get<py::object>(left_)};
     py::object right{std::get<py::object>(right_)};
-
-    // TODO: is this needed?
-    // if (left.equal(m_filter_context.query.nothing) &&
-    //     right.equal(m_filter_context.query.nothing)) {
-    //   return true;
-    // }
-
     return left.equal(right);
   }
 
@@ -501,32 +511,55 @@ JSONPathNodeList resolve_segment(
   return out_nodes;
 }
 
-JSONPathNodeList query(const segments_t& segments, py::object obj,
-                       py::dict functions, py::object nothing) {
-  QueryContext q_ctx{obj, functions, nothing};
+// TODO: Don't pass context around, make all these functions methods of a class.
+
+JSONPathNodeList query_(const segments_t& segments, py::object obj,
+                        function_extension_map functions,
+                        function_signature_map signatures, py::object nothing) {
+  QueryContext q_ctx{obj, functions, signatures, nothing};
   // Bootstrap the node list with root object and an empty location.
   JSONPathNodeList nodes{{obj, {}}};
   for (auto segment : segments) {
     nodes = resolve_segment(q_ctx, nodes, segment);
   }
-  // TODO: check for well-typed function extensions
   return nodes;
 }
 
-JSONPathNodeList query(
-    std::string_view path, py::object obj, py::dict functions,
-    const std::unordered_map<std::string, FunctionExtensionTypes>&
-        function_types,
-    py::object nothing) {
-  segments_t segments{parse(path, function_types)};
-  QueryContext q_ctx{obj, functions, nothing};
+JSONPathNodeList query_(std::string_view path, py::object obj,
+                        function_extension_map functions,
+                        function_signature_map signatures, py::object nothing) {
+  segments_t segments{parse(path, signatures)};
+  QueryContext q_ctx{obj, functions, signatures, nothing};
   // Bootstrap the node list with root object and an empty location.
   JSONPathNodeList nodes{{obj, {}}};
   for (auto segment : segments) {
     nodes = resolve_segment(q_ctx, nodes, segment);
   }
-  // TODO: check for well-typed function extensions
   return nodes;
 }
+
+JSONPathNodeList Env_::query(std::string_view path, py::object obj) {
+  segments_t segments{m_parser.parse(path)};
+  QueryContext q_ctx{obj, m_functions, m_signatures, m_nothing};
+  // Bootstrap the node list with root object and an empty location.
+  JSONPathNodeList nodes{{obj, {}}};
+  for (auto segment : segments) {
+    nodes = resolve_segment(q_ctx, nodes, segment);
+  }
+  return nodes;
+}
+
+JSONPathNodeList Env_::from_segments(const segments_t& segments,
+                                     py::object obj) {
+  QueryContext q_ctx{obj, m_functions, m_signatures, m_nothing};
+  // Bootstrap the node list with root object and an empty location.
+  JSONPathNodeList nodes{{obj, {}}};
+  for (auto segment : segments) {
+    nodes = resolve_segment(q_ctx, nodes, segment);
+  }
+  return nodes;
+}
+
+segments_t Env_::parse(std::string_view path) { return m_parser.parse(path); }
 
 }  // namespace libjsonpath
